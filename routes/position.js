@@ -16,22 +16,12 @@ router.post('/update', checkLogin, (req, res, next) => {
     .then(result => {
       //更新用户位置
       UserModel.updataUserPos(post)
-      //获取其他用户位置
-      UserModel.getNearUsers()
+      //获取其他在线用户位置
+      UserModel.getOnline()
         .then(result => {
-          res.json(result)
+          res.retData(result)
         })
         .catch(next)
-    })
-    .catch(next)
-})
-
-router.get('/find', (req, res, next) => {
-  let { openId } = req.query
-  // console.log(openId)
-  PositionModel.getPosition()
-    .then(result => {
-      res.json(result)
     })
     .catch(next)
 })

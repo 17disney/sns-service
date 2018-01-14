@@ -20,6 +20,7 @@ module.exports = {
     }
     return User.update({ openId }, { $set: set }).exec()
   },
+
   // 获取在线用户
   getOnline: () => {
     let start = Date.now() - 600000 * 30 // 30分钟内活跃
@@ -28,12 +29,14 @@ module.exports = {
       { nickName: 1, avatarFile: 1, gender: 1, pos_at: 1, country: 1, _id: 0 }
     ).exec()
   },
+
   // 通过 openId 获取用户信息
   getUserByOpenid: openid => {
     return User.findOne({ openid }, { openid: 0 })
       .addCreatedAt()
       .exec()
   },
+
   // 更新用户地理信息
   updataUserPos: data => {
     let { openId, coordinates } = data
@@ -42,6 +45,7 @@ module.exports = {
     }
     return User.update({ openId }, { $set: set }).exec()
   },
+
   // 获取附近的用户
   getNearUsers: () => {
     return User.find({}, { openId: 0 })
