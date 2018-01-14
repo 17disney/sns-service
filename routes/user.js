@@ -19,6 +19,7 @@ const config = require('config-lite')(__dirname)
 const appid = config.appid
 const secret = config.secret
 
+// 保存头像
 function saveAvatar(user) {
   return new Promise((resolve, reject) => {
     let { avatarUrl, openid } = user
@@ -62,7 +63,6 @@ var getUser = user => {
     UserModel.getUserByOpenid(openid).then(result => {
       //创建新用户
       if (!result) {
-        console.log('sd')
         saveAvatar(user).then(avatarFile => {
           user.avatarFile = avatarFile
           UserModel.create(user).then(result => {
@@ -81,12 +81,13 @@ var getUser = user => {
 // POST 用户登录
 router.post('/login', async (req, res, next) => {
   let user = req.fields
-
   let { code } = user
+
   let sData = {}
   if (!code) {
-    throw new Error('无Code')
+    return res.retErr('无Code')
   }
+
   try {
     sData = await getOpenid(code)
   } catch (e) {
@@ -101,7 +102,6 @@ router.post('/login', async (req, res, next) => {
 
   delete userInfo.openid
   user.session_key = key
-
   res.retData(userInfo)
 })
 
