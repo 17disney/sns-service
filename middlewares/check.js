@@ -1,7 +1,7 @@
 const SessionModel = require('../models/session')
 
 module.exports = {
-  checkLogin: function checkLogin(req, res, next) {
+  checkLogin(req, res, next) {
     let { session_key } = req.query
 
     if (!session_key) {
