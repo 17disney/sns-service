@@ -119,4 +119,26 @@ router.get('/info', checkLogin, async (req, res, next) => {
   res.retData(posts)
 })
 
+// 修改自己的资料
+router.post('/info', checkLogin, async (req, res, next) => {
+  let {
+    nickName,
+    province,
+    country,
+    gender,
+    city,
+    avatarUrl,
+    openid
+  } = req.fields
+  let posts = await UserModel.updateByOpenid(openid, {
+    nickName,
+    province,
+    country,
+    gender,
+    city,
+    avatarUrl
+  })
+  res.retData('修改成功')
+})
+
 module.exports = router

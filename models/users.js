@@ -6,6 +6,12 @@ module.exports = {
     user.login_at = Date.now()
     return User.create(user).exec()
   },
+
+  // 更新用户信息
+  updateByOpenid: function updateByOpenid(openid, data) {
+    return User.update({ openid }, { $set: data }).exec()
+  },
+
   // 登录
   login: data => {
     let { openId } = data
