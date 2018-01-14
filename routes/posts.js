@@ -8,9 +8,8 @@ const UserModel = require('../models/users')
 
 // 获取列表
 router.get('/', async (req, res, next) => {
-  let { limit = 10, page = 0 } = req.query
-  console.log(limit)
-  let data = await PostModel.getPosts(limit, page)
+  let { limit = 10, page = 0, type = '' } = req.query
+  let data = await PostModel.getPosts(limit, page, type)
   res.retData(data)
 })
 

@@ -34,11 +34,13 @@ module.exports = {
   },
 
   // 获取文章列表
-  getPosts: function getPosts(limit, page) {
+  getPosts: function getPosts(limit, page, type) {
     limit = parseInt(limit)
     page = parseInt(page)
+
+    let find = type ? { type } : {}
     return (
-      Post.find()
+      Post.find(find, { openid: 0 })
         // .populate({ path: 'author', model: 'User' })
         .skip(page * limit)
         .limit(limit)
