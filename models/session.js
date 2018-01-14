@@ -13,6 +13,7 @@ module.exports = {
     Session.create(session).exec()
     return key
   },
+
   // 获取 Session
   get(key) {
     return Session.findOne({ key })

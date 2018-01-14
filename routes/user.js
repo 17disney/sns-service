@@ -20,7 +20,7 @@ const appid = config.appid
 const secret = config.secret
 
 // 保存头像
-function saveAvatar(user) {
+var saveAvatar = user => {
   return new Promise((resolve, reject) => {
     let { avatarUrl, openid } = user
     let img_filename =
@@ -31,7 +31,7 @@ function saveAvatar(user) {
       fs.createWriteStream('./public/avatar/' + img_filename)
     )
 
-    writeStream.on('finish', function() {
+    writeStream.on('finish', () => {
       resolve(img_filename)
     })
   })

@@ -18,11 +18,10 @@ app.use(express.static(path.join(__dirname, 'public')))
 // 处理表单及文件上传的中间件
 app.use(
   require('express-formidable')({
-    uploadDir: path.join(__dirname, 'public/img'), // 上传文件目录
+    uploadDir: path.join(__dirname, 'public/posts'), // 上传文件目录
     keepExtensions: true // 保留后缀
   })
 )
-
 
 // 返回方法
 app.use((req, res, next) => {

@@ -1,10 +1,12 @@
 const express = require('express')
 const moment = require('moment')
 const router = express.Router()
+const path = require('path')
 
 const checkLogin = require('../middlewares/check').checkLogin
 const PostModel = require('../models/posts')
 const UserModel = require('../models/users')
+const fs = require('fs')
 
 // 获取列表
 router.get('/', async (req, res, next) => {
@@ -44,7 +46,6 @@ router.post('/', checkLogin, async (req, res, next) => {
 
   // 获取用户发帖
   let uPost = await PostModel.getPostByOpenid(openid)
-
   if (uPost.length > 0) {
     let { created_at } = uPost[0]
     // 防灌水
@@ -87,7 +88,7 @@ router.get('/:postId', async (req, res, next) => {
     // CommentModel.getComments(postId), // 获取该文章所有留言
     PostModel.incPv(postId) // pv 加 1
   ])
-    .then(function(post) {
+    .then(post => {
       // const comments = result[1]
       if (!post) {
         res.retErr('该文章不存在')
@@ -102,7 +103,7 @@ router.get('/:postId', async (req, res, next) => {
 })
 
 // PUT 更新一篇文章
-router.put('/:postId', checkLogin, function(req, res, next) {
+router.put('/:postId', checkLogin, (req, res, next) => {
   const {
     openid,
     content,
@@ -124,7 +125,7 @@ router.put('/:postId', checkLogin, function(req, res, next) {
     return
   }
 
-  PostModel.getRawPostById(postId).then(function(post) {
+  PostModel.getRawPostById(postId).then(post => {
     if (!post) {
       return res.retErr('文章不存在')
     }
@@ -140,18 +141,18 @@ router.put('/:postId', checkLogin, function(req, res, next) {
       coordinates,
       pos_name
     })
-      .then(function() {
+      .then(() => {
         return res.retData('success', '编辑成功')
       })
       .catch(next)
   })
 })
 
-// DELETE 删除一篇文章
-router.delete('/:postId', checkLogin, function(req, res, next) {
+// DELETE 删除文章
+router.delete('/:postId', checkLogin, (req, res, next) => {
   const { openid } = req.fields
   const postId = req.params.postId
-  PostModel.getRawPostById(postId).then(function(post) {
+  PostModel.getRawPostById(postId).then(post => {
     if (!post) {
       return res.retErr('文章不存在')
     }
@@ -159,11 +160,16 @@ router.delete('/:postId', checkLogin, function(req, res, next) {
       return res.retErr('没有权限')
     }
     PostModel.delPostById(postId)
-      .then(function() {
+      .then(() => {
         return res.retData('success', '删除成功')
       })
       .catch(next)
   })
+})
+
+// 上传图片
+router.post('/upload', (req, res, next) => {
+  res.retData(req.files.file.path.split(path.sep).pop())
 })
 
 module.exports = router

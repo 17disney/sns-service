@@ -1,4 +1,5 @@
 config
 node_modules
 public/avatar
+public/posts
 logs

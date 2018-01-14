@@ -21,9 +21,7 @@ module.exports = {
   getPostById(postId) {
     return (
       Post.findOne({ _id: ObjectId(postId) }, { openid: 0 })
-        // .populate({ path: 'openid', model: 'User' })
         .addCreatedAt()
-        // .addCommentsCount()
         .exec()
     )
   },
@@ -41,7 +39,6 @@ module.exports = {
     let find = type ? { type } : {}
     return (
       Post.find(find, { openid: 0 })
-        // .populate({ path: 'author', model: 'User' })
         .skip(page * limit)
         .limit(limit)
         .sort({ _id: -1 })

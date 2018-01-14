@@ -6,7 +6,6 @@ const park_arr = require('../lib/park_arr')
 
 router.get('/', (req, res, next) => {
   let { data } = park_arr
-
   res.retData(data)
 })
 
