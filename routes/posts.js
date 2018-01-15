@@ -12,6 +12,9 @@ const fs = require('fs')
 router.get('/', async (req, res, next) => {
   let { limit = 10, page = 0, type = '' } = req.query
   let data = await PostModel.getPosts(limit, page, type)
+  for (let item of data) {
+    delete item.openid
+  }
   res.retData(data)
 })
 
@@ -169,6 +172,7 @@ router.delete('/:postId', checkLogin, (req, res, next) => {
 
 // 上传图片
 router.post('/upload', (req, res, next) => {
+  console.log(req)
   res.retData(req.files.file.path.split(path.sep).pop())
 })
 

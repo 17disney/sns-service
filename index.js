@@ -73,7 +73,6 @@ app.use((err, req, res, next) => {
 })
 
 // 监听端口，启动程序
-
 if (process.env.NODE_ENV === 'production') {
   http.createServer(app).listen(config.port)
 } else {
@@ -83,6 +82,7 @@ if (process.env.NODE_ENV === 'production') {
 
   var httpsServer = https.createServer(credentials, app)
   httpsServer.listen(443)
+  console.log('443')
 }
 
 console.log('Disney-SNS')

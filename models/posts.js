@@ -38,7 +38,7 @@ module.exports = {
 
     let find = type ? { type } : {}
     return (
-      Post.find(find, { openid: 0 })
+      Post.find({type: 'travel'}, { openid: 0 })
         .skip(page * limit)
         .limit(limit)
         .sort({ _id: -1 })
