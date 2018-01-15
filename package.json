@@ -1,12 +1,12 @@
 {
   "name": "disney-sns",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "disney-sns",
   "main": "index.js",
   "scripts": {
     "test": "istanbul cover _mocha",
     "start": "NODE_ENV=production pm2 start index.js --name 'disney-sns'",
-    "dev": "NODE_ENV=production pm2 start index.js --name 'disney-sns'"
+    "dep": "set NODE_ENV=production&&node index"
   },
   "author": "xank",
   "license": "MIT",
