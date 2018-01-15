@@ -88,15 +88,12 @@ router.get('/:postId', async (req, res, next) => {
   const { postId } = req.params
   Promise.all([
     PostModel.getPostById(postId), // 获取文章信息
-    // CommentModel.getComments(postId), // 获取该文章所有留言
     PostModel.incPv(postId) // pv 加 1
   ])
     .then(post => {
-      // const comments = result[1]
       if (!post) {
         res.retErr('该文章不存在')
       }
-
       let data = post
       res.retData({
         data
@@ -133,7 +130,7 @@ router.put('/:postId', checkLogin, (req, res, next) => {
       return res.retErr('文章不存在')
     }
     if (post.openid !== openid) {
-      return res.retErr('没有权限')
+      return res.retErr('你只能删除自己的文章')
     }
 
     PostModel.updatePostById(postId, {
@@ -160,7 +157,7 @@ router.delete('/:postId', checkLogin, (req, res, next) => {
       return res.retErr('文章不存在')
     }
     if (post.openid !== openid) {
-      return res.retErr('没有权限')
+      return res.retErr('你只能删除自己的文章')
     }
     PostModel.delPostById(postId)
       .then(() => {
@@ -172,7 +169,6 @@ router.delete('/:postId', checkLogin, (req, res, next) => {
 
 // 上传图片
 router.post('/upload', (req, res, next) => {
-  console.log(req)
   res.retData(req.files.file.path.split(path.sep).pop())
 })
 
