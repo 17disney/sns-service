@@ -88,11 +88,11 @@ router.post('/login', async (req, res, next) => {
     return res.retErr('无Code')
   }
 
-  try {
-    sData = await getOpenid(code)
-  } catch (e) {
-    throw new Error('code error')
+  sData = await getOpenid(code)
+  if (!sData) {
+    return res.retErr('code 已使用')
   }
+
   let { openid, session_key } = sData
 
   // 创建/登录用户
