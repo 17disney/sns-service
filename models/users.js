@@ -14,11 +14,11 @@ module.exports = {
 
   // 登录
   login(data) {
-    let { openId } = data
+    let { openid } = data
     let set = {
       login_at: Date.now()
     }
-    return User.update({ openId }, { $set: set }).exec()
+    return User.update({ openid }, { $set: set }).exec()
   },
 
   // 获取在线用户
@@ -30,7 +30,7 @@ module.exports = {
     ).exec()
   },
 
-  // 通过 openId 获取用户信息
+  // 通过 openid 获取用户信息
   getUserByOpenid(openid) {
     return User.findOne({ openid }, { openid: 0 })
       .addCreatedAt()
@@ -39,15 +39,15 @@ module.exports = {
 
   // 更新用户地理信息
   updataUserPos(data) {
-    let { openId, coordinates } = data
+    let { openid, coordinates } = data
     let set = {
       pos_at: Date.now() // 位置更新时间
     }
-    return User.update({ openId }, { $set: set }).exec()
+    return User.update({ openid }, { $set: set }).exec()
   },
 
   // 获取附近的用户
   getNearUsers() {
-    return User.find({}, { openId: 0 })
+    return User.find({}, { openid: 0 })
   }
 }
