@@ -41,6 +41,7 @@ module.exports = {
   updataUserPos(data) {
     let { openid, coordinates } = data
     let set = {
+      coordinates,
       pos_at: Date.now() // 位置更新时间
     }
     return User.update({ openid }, { $set: set }).exec()
