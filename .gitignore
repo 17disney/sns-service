@@ -3,4 +3,5 @@ node_modules
 public/avatar
 public/posts
 public/images
+lib/park_arr.js
 logs

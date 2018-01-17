@@ -27,7 +27,7 @@ router.post('/', checkLogin, async (req, res, next) => {
     at = '',
     type = 'travel',
     coordinates = [],
-    pos_name = '',
+    posName = '',
     openid
   } = req.fields
 
@@ -66,7 +66,7 @@ router.post('/', checkLogin, async (req, res, next) => {
     task,
     at,
     coordinates,
-    pos_name,
+    posName,
     pv: 0,
     nickName,
     avatarFile,
@@ -109,7 +109,7 @@ router.put('/:postId', checkLogin, (req, res, next) => {
     content,
     images = [],
     coordinates = [],
-    pos_name = '',
+    posName = '',
     at = '',
     task = {}
   } = req.fields
@@ -139,7 +139,7 @@ router.put('/:postId', checkLogin, (req, res, next) => {
       at,
       task,
       coordinates,
-      pos_name
+      posName
     })
       .then(() => {
         return res.retData('success', '编辑成功')

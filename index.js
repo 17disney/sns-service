@@ -13,7 +13,7 @@ var fs = require('fs')
 const app = express()
 
 // 静态文件目录
-app.use(express.static(path.join(__dirname, 'public')))
+app.use('/upload', express.static('public'))
 
 // 处理表单及文件上传的中间件
 app.use(
