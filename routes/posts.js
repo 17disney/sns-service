@@ -24,7 +24,7 @@ router.post('/', checkLogin, async (req, res, next) => {
     content,
     images = [],
     task = {},
-    at = '',
+    eit = '',
     type = 'travel',
     coordinates = [],
     posName = '',
@@ -64,7 +64,7 @@ router.post('/', checkLogin, async (req, res, next) => {
     content,
     images,
     task,
-    at,
+    eit,
     coordinates,
     posName,
     pv: 0,
@@ -110,7 +110,7 @@ router.put('/:postId', checkLogin, (req, res, next) => {
     images = [],
     coordinates = [],
     posName = '',
-    at = '',
+    eit = '',
     task = {}
   } = req.fields
   const postId = req.params.postId
@@ -136,7 +136,7 @@ router.put('/:postId', checkLogin, (req, res, next) => {
     PostModel.updatePostById(postId, {
       content,
       images,
-      at,
+      eit,
       task,
       coordinates,
       posName
