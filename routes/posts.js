@@ -3,6 +3,7 @@ const moment = require('moment')
 const router = express.Router()
 const path = require('path')
 
+
 const checkLogin = require('../middlewares/check').checkLogin
 const PostModel = require('../models/posts')
 const UserModel = require('../models/users')
@@ -28,13 +29,13 @@ router.post('/', checkLogin, async (req, res, next) => {
     type = 'travel',
     coordinates = [],
     posName = '',
-    openid,
+    openid
   } = req.fields
 
   // 校验参数
   try {
     if (!content) {
-      throw new Error('无content')
+      throw new Error('你的想法呢？')
     }
     if (!openid) {
       throw new Error('无openid')
@@ -47,12 +48,12 @@ router.post('/', checkLogin, async (req, res, next) => {
   let userinfo = await UserModel.getUserByOpenid(openid)
   let { nickName, avatarFile, city, gender, country } = userinfo
 
-  // 获取用户发帖
+  // // 获取用户发帖
   let uPost = await PostModel.getPostByOpenid(openid)
   if (uPost.length > 0) {
-    let { created_at } = uPost[0]
+    let { createTime } = uPost[0]
     // 防灌水
-    let diff = -moment(created_at).diff(moment())
+    let diff = Date.now() - createTime
     if (diff <= 10000) {
       res.retErr('歇一歇哦，发帖过快~')
       return
@@ -82,6 +83,8 @@ router.post('/', checkLogin, async (req, res, next) => {
       res.retData('发布成功！')
     })
     .catch(next)
+
+
 })
 
 // GET 获取文章详情
@@ -153,6 +156,7 @@ router.put('/:postId', checkLogin, (req, res, next) => {
 router.delete('/:postId', checkLogin, (req, res, next) => {
   const { openid } = req.fields
   const postId = req.params.postId
+
   PostModel.getRawPostById(postId).then(post => {
     if (!post) {
       return res.retErr('文章不存在')
@@ -169,8 +173,10 @@ router.delete('/:postId', checkLogin, (req, res, next) => {
 })
 
 // 上传图片
-router.post('/upload', (req, res, next) => {
-  res.retData(req.files.file.path.split(path.sep).pop())
-})
+// router.post('/upload', (req, res, next) => {
+//   res.retData(req.files.file.path.split(path.sep).pop())
+// })
+
+
 
 module.exports = router

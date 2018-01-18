@@ -69,6 +69,7 @@ app.use(
 
 //错误返回
 app.use((err, req, res, next) => {
+  console.log('err')
   res.retErr(err.message)
 })
 
