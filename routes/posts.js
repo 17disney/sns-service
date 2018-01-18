@@ -28,7 +28,7 @@ router.post('/', checkLogin, async (req, res, next) => {
     type = 'travel',
     coordinates = [],
     posName = '',
-    openid
+    openid,
   } = req.fields
 
   // 校验参数
@@ -73,7 +73,8 @@ router.post('/', checkLogin, async (req, res, next) => {
     city,
     gender,
     country,
-    openid
+    openid,
+    createTime: Date.now()
   }
 
   PostModel.create(post)
