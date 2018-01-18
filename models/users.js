@@ -23,10 +23,18 @@ module.exports = {
 
   // 获取在线用户
   getOnline() {
-    let start = Date.now() - 600000 * 30 // 30分钟内活跃
+    let start = Date.now() - 60000 * 3000 // 30分钟内活跃
     return User.find(
       { pos_at: { $gt: start } },
-      { nickName: 1, avatarFile: 1, gender: 1, pos_at: 1, country: 1, _id: 0 }
+      {
+        nickName: 1,
+        coordinates: 1,
+        avatarFile: 1,
+        gender: 1,
+        pos_at: 1,
+        country: 1,
+        _id: 0
+      }
     ).exec()
   },
 
