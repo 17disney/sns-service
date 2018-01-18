@@ -34,7 +34,7 @@ router.post('/', checkLogin, async (req, res, next) => {
 
   // 校验参数
   try {
-    if (!content) {
+    if (!content && images.length === 0) {
       throw new Error('你的想法呢？')
     }
     if (!openid) {
@@ -42,6 +42,7 @@ router.post('/', checkLogin, async (req, res, next) => {
     }
   } catch (e) {
     res.retErr(e.message)
+    return
   }
 
   // 获取用户资料
@@ -83,8 +84,6 @@ router.post('/', checkLogin, async (req, res, next) => {
       res.retData('发布成功！')
     })
     .catch(next)
-
-
 })
 
 // GET 获取文章详情
