@@ -1,17 +1,8 @@
 const Session = require('../lib/mongo').Session
-const { createSession } = require('../lib/util')
 module.exports = {
   // 设置 Session
-  set(data) {
-    let { openid, session_key } = data
-    let key = createSession()
-    let session = {
-      key,
-      openid,
-      session_key
-    }
-    Session.create(session).exec()
-    return key
+  set(session) {
+    return Session.create(session).exec()
   },
 
   // 获取 Session

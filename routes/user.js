@@ -1,28 +1,23 @@
+const config = require('config-lite')(__dirname)
 const fs = require('fs')
-const path = require('path')
-const sha1 = require('sha1')
 const express = require('express')
 const router = express.Router()
 const https = require('https')
-
 const checkLogin = require('../middlewares/check').checkLogin
 const UserModel = require('../models/users')
 const PostModel = require('../models/posts')
 const SessionModel = require('../models/session')
 
-var crypto = require('crypto')
-var request = require('request')
-var md5 = crypto.createHash('md5')
-
-const config = require('config-lite')(__dirname)
-
+const crypto = require('crypto')
+const request = require('request')
+const md5 = crypto.createHash('md5')
+const { to, createSession } = require('../lib/util')
 const appid = config.appid
 const secret = config.secret
 
 // 保存头像
-var saveAvatar = user => {
+const saveAvatar = avatarUrl => {
   return new Promise((resolve, reject) => {
-    let { avatarUrl, openid } = user
     let img_filename =
       Math.random()
         .toString(36)
@@ -30,7 +25,6 @@ var saveAvatar = user => {
     let writeStream = request(avatarUrl).pipe(
       fs.createWriteStream('./public/avatar/' + img_filename)
     )
-
     writeStream.on('finish', () => {
       resolve(img_filename)
     })
@@ -38,7 +32,7 @@ var saveAvatar = user => {
 }
 
 // 获取openid
-var getOpenid = code => {
+const getOpenid = code => {
   return new Promise((resolve, reject) => {
     let url = `https://api.weixin.qq.com/sns/jscode2session?appid=${appid}&secret=${secret}&js_code=${code}&grant_type=authorization_code`
     https.get(url, res => {
@@ -55,54 +49,55 @@ var getOpenid = code => {
   })
 }
 
-// 获取用户信息
-var getUser = user => {
-  let { openid } = user
-  delete user.code
-  return new Promise((resolve, reject) => {
-    UserModel.getUserByOpenid(openid).then(result => {
-      //创建新用户
-      if (!result) {
-        saveAvatar(user).then(avatarFile => {
-          user.avatarFile = avatarFile
-          UserModel.create(user).then(result => {
-            resolve(user)
-          })
-        })
-      } else {
-        UserModel.login(user).then(result => {
-          resolve(user)
-        })
-      }
-    })
-  })
-}
-
 // POST 用户登录
 router.post('/login', async (req, res, next) => {
-  let user = req.fields
-  let { code } = user
+  try {
+    let err, data
+    let { code } = req.fields
+    if (!code) throw new Error('无Code')
+    ;[err, data] = await to(getOpenid(code))
+    if (err) throw new Error(err)
 
-  let sData = {}
-  if (!code) {
-    return res.retErr('无Code')
+    // 读取微信用户信息
+    let { openid } = data
+    ;[err, data] = await to(UserModel.getUserByOpenid(openid))
+    if (err) throw new Error(err)
+
+    let user = data
+    // 已注册
+    if (data) {
+      ;[err] = await to(UserModel.loginByOpenid(openid))
+      if (err) throw new Error(err)
+    } else {
+      user = req.fields
+      let {avatarUrl} = user
+
+      // 保存用户头像
+      ;[err] = await to(saveAvatar(avatarUrl))
+      if (err) throw new Error(err)
+
+      // 创建新用户
+      delete user.code
+      user.openid = openid
+      ;[err] = await to(UserModel.create(user))
+      if (err) throw new Error(err)
+    }
+
+    // 生成 session_key
+    let key = createSession()
+    let session = {
+      openid,
+      key
+    }
+    ;[err] = await to(SessionModel.set(session))
+    if (err) throw new Error(err)
+
+    user.session_key = key
+    return res.retData(user)
+
+  } catch (e) {
+    res.retErr(e.message)
   }
-
-  sData = await getOpenid(code)
-  if (!sData) {
-    return res.retErr('code 已使用')
-  }
-
-  let { openid, session_key } = sData
-
-  // 创建/登录用户
-  user.openid = openid
-  let userInfo = await getUser(user)
-  let key = await SessionModel.set(sData)
-
-  delete userInfo.openid
-  user.session_key = key
-  res.retData(userInfo)
 })
 
 // 获取自己的文章

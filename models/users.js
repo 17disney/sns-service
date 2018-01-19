@@ -1,9 +1,10 @@
 const User = require('../lib/mongo').User
-
+ObjectId = require('mongodb').ObjectID
 module.exports = {
   // 创建新用户
   create(user) {
-    user.login_at = Date.now()
+    user.loginAt = Date.now()
+    user.createAt = Date.now()
     return User.create(user).exec()
   },
 
@@ -12,15 +13,23 @@ module.exports = {
     return User.update({ openid }, { $set: data }).exec()
   },
 
-  // 登录
-  login(data) {
-    let { openid } = data
+  // openid 登录
+  loginByOpenid(openid) {
     let set = {
-      login_at: Date.now()
+      loginAt: Date.now() //登录时间
     }
     return User.update({ openid }, { $set: set }).exec()
   },
 
+  // openid 获取用户信息
+  getUserByOpenid(openid) {
+    return User.findOne({ openid }, { openid: 0 }).exec()
+  },
+
+  // id 获取用户信息
+  getUserById(openid) {
+    return User.findOne({ _id: ObjectId(postId) }).exec()
+  },
   // 获取在线用户
   getOnline() {
     let start = Date.now() - 60000 * 3000 // 30分钟内活跃
@@ -32,17 +41,9 @@ module.exports = {
         avatarFile: 1,
         gender: 1,
         pos_at: 1,
-        country: 1,
-        _id: 0
+        country: 1
       }
     ).exec()
-  },
-
-  // 通过 openid 获取用户信息
-  getUserByOpenid(openid) {
-    return User.findOne({ openid }, { openid: 0 })
-      .addCreatedAt()
-      .exec()
   },
 
   // 更新用户地理信息

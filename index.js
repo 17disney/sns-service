@@ -15,11 +15,10 @@ const app = express()
 // 静态文件目录
 app.use('/upload', express.static('public'))
 
-// 处理表单及文件上传的中间件
 app.use(
   require('express-formidable')({
-    uploadDir: path.join(__dirname, 'public/posts'), // 上传文件目录
-    keepExtensions: true // 保留后缀
+    uploadDir: path.join(__dirname, 'public/posts'),
+    keepExtensions: true
   })
 )
 
@@ -34,17 +33,14 @@ app.use((req, res, next) => {
   next()
 })
 
-// 路由
-routes(app)
-
 // 正常请求的日志
 app.use(
   expressWinston.logger({
     transports: [
-      new winston.transports.Console({
-        json: true,
-        colorize: true
-      }),
+      // new winston.transports.Console({
+      //   json: true,
+      //   colorize: true
+      // }),
       new winston.transports.File({
         filename: 'logs/success.log'
       })
@@ -52,14 +48,17 @@ app.use(
   })
 )
 
+// 路由
+routes(app)
+
 // 错误请求的日志
 app.use(
   expressWinston.errorLogger({
     transports: [
-      new winston.transports.Console({
-        json: true,
-        colorize: true
-      }),
+      // new winston.transports.Console({
+      //   json: true,
+      //   colorize: true
+      // }),
       new winston.transports.File({
         filename: 'logs/error.log'
       })
@@ -69,8 +68,7 @@ app.use(
 
 //错误返回
 app.use((err, req, res, next) => {
-  console.log('err')
-  res.retErr(err.message)
+  return res.retErr(err.message)
 })
 
 // 监听端口，启动程序
@@ -85,5 +83,9 @@ if (process.env.NODE_ENV === 'production') {
   httpsServer.listen(443)
   console.log('443')
 }
+
+process.on('unhandledRejection', e => {
+  console.log(e.message)
+})
 
 console.log('Disney-SNS')

@@ -5,7 +5,7 @@ module.exports = app => {
   app.use('/position', require('./position'))
 
   // 404 page
-  app.use((req, res) => {
+  app.use((req, res, err) => {
     if (!res.headersSent) {
       res.json({ err: '404' })
     }

@@ -3,7 +3,6 @@ const moment = require('moment')
 const router = express.Router()
 const path = require('path')
 
-
 const checkLogin = require('../middlewares/check').checkLogin
 const PostModel = require('../models/posts')
 const UserModel = require('../models/users')
