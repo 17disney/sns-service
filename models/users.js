@@ -6,12 +6,18 @@ module.exports = {
     user.loginAt = Date.now()
     user.createAt = Date.now()
     user.pv = 0
+    user.like = 0
     return User.create(user).exec()
   },
 
   // 增加个人主页浏览量
   incPv(userid) {
     return User.update({ userid }, { $inc: { pv: 1 } }).exec()
+  },
+
+  // 增加个人主页点赞
+  incLike(userid, op) {
+    return User.update({ userid }, { $inc: { like: op } }).exec()
   },
 
   // Openid 更新用户信息

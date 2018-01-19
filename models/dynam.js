@@ -47,8 +47,24 @@ module.exports = {
       notice: false,
       display: false
     }
+    if (op === 'like') {
+      return Dynam.remove(find).exec()
+    } else {
+      return Dynam.update(find, { $set }, false, true).exec()
+    }
+  },
 
-    return Dynam.update(find, { $set }, false, true).exec()
+  // 检查是否已点赞
+  checkLike(userid, vistid, type, targid) {
+    let find = {
+      type,
+      userid,
+      vistid,
+      targid,
+      op: 'like'
+    }
+    removeProperty(find)
+    return Dynam.findOne(find).exec()
   },
 
   // 获取访问人数

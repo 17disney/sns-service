@@ -112,7 +112,9 @@ router.get('/info', checkLogin, async (req, res, next) => {
   if (err) throw new Error(err)
 
   let vistList = await DynamModel.loadVist(userid, 'vist', 'pv')
+  let likeList = await DynamModel.loadVist(userid, 'vist', 'like')
   data.vistList = vistList
+  data.likeList = likeList
 
   return res.retData(data)
 })
@@ -121,7 +123,7 @@ router.get('/info', checkLogin, async (req, res, next) => {
 router.get('/vist', checkLogin, async (req, res, next) => {
   try {
     let arr, data
-    let { userid } = req.fields
+    const { userid } = req.fields
     const { id } = req.query
     if (!id) throw new Error('缺少查询条件')
     ;[err, data] = await to(UserModel.getUserById(id))
@@ -138,8 +140,50 @@ router.get('/vist', checkLogin, async (req, res, next) => {
     }
 
     let vistList = await DynamModel.loadVist(id, 'vist', 'pv')
+    let likeList = await DynamModel.loadVist(id, 'vist', 'like')
     data.vistList = vistList
+    data.likeList = likeList
     return res.retData(data)
+  } catch (e) {
+    return res.retErr(e.message)
+  }
+})
+
+// POST 点赞
+router.post('/like', checkLogin, async (req, res, next) => {
+  try {
+    let err, data
+    const { userid, id: vistid } = req.fields
+    let { op } = req.fields
+    op = !!op
+
+    if (!vistid) {
+      throw new Error('没有指定用户')
+    }
+
+    if (userid === vistid) {
+      throw new Error('不能给自己点赞')
+    }
+
+    ;[err, data] = await to(UserModel.getUserById(userid))
+    if (err) throw new Error(err)
+    const user = data
+
+    // 检查知否已点赞
+    ;[err, data] = await to(DynamModel.checkLike(userid, vistid, 'vist'))
+    if (err) throw new Error(err)
+    if (data && op) throw new Error('已点过赞')
+    if (!data && !op) throw new Error('取消点赞成功')
+
+    if (op) {
+      await DynamModel.vist(user, vistid, 'vist', 'like')
+      await UserModel.incLike(vistid, 1)
+      return res.retData('点赞成功')
+    } else {
+      await DynamModel.reVist(user, vistid, 'vist', 'like')
+      await UserModel.incLike(vistid, -1)
+      return res.retData('取消点赞成功')
+    }
   } catch (e) {
     return res.retErr(e.message)
   }

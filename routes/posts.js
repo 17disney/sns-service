@@ -86,7 +86,7 @@ router.post('/', checkLogin, async (req, res, next) => {
 
     let diff = Date.now() - postAt
     if (diff <= 10000) {
-      return res.retErr('歇一歇哦，发帖过快~')
+      throw new Error('歇一歇哦，发帖过快~')
     }
 
     let post = {
