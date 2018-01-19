@@ -6,6 +6,8 @@ const path = require('path')
 const checkLogin = require('../middlewares/check').checkLogin
 const PostModel = require('../models/posts')
 const UserModel = require('../models/users')
+const DynamModel = require('../models/dynam')
+
 const fs = require('fs')
 const { to, createSession, removeProperty } = require('../lib/util')
 
@@ -101,8 +103,6 @@ router.post('/', checkLogin, async (req, res, next) => {
       eit,
       coordinates,
       posName,
-      pv: 0,
-      zan: 0,
       createTime: Date.now()
     }
     removeProperty(post)
@@ -124,34 +124,46 @@ router.post('/', checkLogin, async (req, res, next) => {
 })
 
 // 文章点赞
-router.post('/zan', async (req, res, next) => {
+router.post('/like', async (req, res, next) => {
   try {
-    const { postId, zan = true, userid } = req.fields
+    const { userid, postid, op = true } = req.fields
     let err, data
-
-    PostModel.incZan(postId)
+    if (!postid) throw new Error('没有文章id')
   } catch (e) {
     return res.retErr(e.message)
   }
 })
 
 // GET 获取文章详情
-router.get('/:postId', async (req, res, next) => {
-  const { postId } = req.params
-  Promise.all([
-    PostModel.getPostById(postId), // 获取文章信息
-    PostModel.incPv(postId) // pv 加 1
-  ])
-    .then(post => {
-      if (!post) {
-        res.retErr('该文章不存在')
-      }
-      let data = post
-      res.retData({
-        data
-      })
-    })
-    .catch(next)
+router.get('/:postid', checkLogin, async (req, res, next) => {
+  try {
+    let err, data
+    const { postid } = req.params
+    const { userid } = req.fields
+    if (!postid) {
+      throw new Error('没有文章id')
+    }
+
+    ;[err, data] = await to(PostModel.getPostById(postid))
+    if (err) throw new Error(err)
+
+    let vistid = data.userid
+
+    if (userid !== vistid) {
+      let user = await UserModel.getUserById(userid)
+      await PostModel.incPv(postid)
+      await DynamModel.reVist(user, vistid, 'post', 'pv')
+      await DynamModel.vist(user, vistid, 'post', 'pv', postid)
+    }
+
+    let pvList = await DynamModel.loadVist(vistid, 'post', 'pv', postid)
+    data.pvList = pvList
+
+    delete data.openid
+    return res.retData(data)
+  } catch (e) {
+    return res.retErr(e.message)
+  }
 })
 
 // PUT 更新一篇文章

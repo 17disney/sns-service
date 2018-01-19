@@ -2,45 +2,62 @@ const Dynam = require('../lib/mongo').Dynam
 const ObjectId = require('mongodb').ObjectID
 const moment = require('moment')
 const date = moment().format('YYYYMMDD')
-
+const { removeProperty } = require('../lib/util')
 module.exports = {
-  // 访问他人空间
-  vist(user, vistid) {
-    let { userid, nickName, avatarUrl } = user
+  /*
+   type: 对象类型
+   op: 操作类型
+  */
+  vist(user, vistid, type, op, targid) {
+    let { userid, nickName, avatarFile } = user
     let data = {
-      type: 'vist',
-      nickName,
-      avatarUrl,
+      type,
+      op,
       userid,
       vistid,
+      targid,
+      nickName,
+      avatarFile,
       date,
       notice: true,
       display: true
     }
+    removeProperty(data)
     return Dynam.create(data).exec()
   },
 
-  // 删除当天重复访问空间通知
-  reVist(user, vistid) {
+  // 删除重复
+  reVist(user, vistid, type, op, targid) {
     let { userid } = user
     let find = {
+      type,
+      op,
       userid,
       vistid,
-      date,
-      notice: true
+      targid,
+      display: true
     }
+    // 删除当天重复访问
+    if (op === 'pv') {
+      find.date = date
+    }
+    removeProperty(find)
+
     let $set = {
       notice: false,
       display: false
     }
+
     return Dynam.update(find, { $set }, false, true).exec()
   },
 
-  // 查看空间访问人数
-  loadVist(vistid) {
+  // 获取访问人数
+  loadVist(vistid, type, op, targid) {
     let find = {
-      type: 'vist',
+      type,
+      op,
       vistid,
+      targid,
       display: true
     }
     return Dynam.find(find, {
@@ -48,19 +65,22 @@ module.exports = {
       notice: 0,
       type: 0,
       vistid: 0,
+      date: 0,
+      op: 0,
+      userid: 0,
+      targid: 0
     })
       .addCreatedAt()
       .exec()
   },
 
-  // 已查看动态
-  read(id) {
-    let data = {
+  // 本人查看动态
+  userRead(vistid) {
+    let $set = {
       userid,
       vistid,
-      createAt: Date.now(),
-      notice: true
+      notice: false
     }
-    return Dynam.update({ openid }, { $set }).exec()
+    return Dynam.update({ vistid }, { $set }).exec()
   }
 }

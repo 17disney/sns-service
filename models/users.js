@@ -5,12 +5,13 @@ module.exports = {
   create(user) {
     user.loginAt = Date.now()
     user.createAt = Date.now()
+    user.pv = 0
     return User.create(user).exec()
   },
 
   // 增加个人主页浏览量
-  incVist(userid) {
-    return User.update({ userid }, { $inc: { vist: 1 } }).exec()
+  incPv(userid) {
+    return User.update({ userid }, { $inc: { pv: 1 } }).exec()
   },
 
   // Openid 更新用户信息

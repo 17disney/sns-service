@@ -74,12 +74,14 @@ router.post('/login', async (req, res, next) => {
       user = req.fields
       // 保存用户头像
       let { avatarUrl } = user
-      ;[err] = await to(saveAvatar(avatarUrl))
+      ;[err, data] = await to(saveAvatar(avatarUrl))
       if (err) throw new Error(err)
+      let avatarFile = data
 
       // 创建新用户
       delete user.code
       userid = md5(openid)
+      user.avatarFile = avatarFile
       user.openid = openid
       user.userid = userid
       ;[err] = await to(UserModel.create(user))
@@ -109,7 +111,7 @@ router.get('/info', checkLogin, async (req, res, next) => {
   ;[err, data] = await to(UserModel.getUserById(userid))
   if (err) throw new Error(err)
 
-  let vistList = await DynamModel.loadVist(userid)
+  let vistList = await DynamModel.loadVist(userid, 'vist', 'pv')
   data.vistList = vistList
 
   return res.retData(data)
@@ -129,13 +131,13 @@ router.get('/vist', checkLogin, async (req, res, next) => {
 
     // 判断是否访问自己
     if (userid !== id) {
-      let myInfo = await UserModel.getUserById(userid)
-      await UserModel.incVist(id)
-      await DynamModel.reVist(myInfo, id)
-      await DynamModel.vist(myInfo, id)
+      let user = await UserModel.getUserById(userid)
+      await UserModel.incPv(id)
+      await DynamModel.reVist(user, id, 'vist', 'pv')
+      await DynamModel.vist(user, id, 'vist', 'pv')
     }
 
-    let vistList = await DynamModel.loadVist(id)
+    let vistList = await DynamModel.loadVist(id, 'vist', 'pv')
     data.vistList = vistList
     return res.retData(data)
   } catch (e) {
