@@ -8,9 +8,14 @@ module.exports = {
     return User.create(user).exec()
   },
 
-  // 更新用户信息
-  updateByOpenid(openid, data) {
-    return User.update({ openid }, { $set: data }).exec()
+  // Openid 更新用户信息
+  updateByOpenid(openid, $set) {
+    return User.update({ openid }, { $set }).exec()
+  },
+
+  // Openid 更新用户信息
+  updateByid(userid, $set) {
+    return User.update({ userid }, { $set }).exec()
   },
 
   // openid 登录
@@ -23,13 +28,14 @@ module.exports = {
 
   // openid 获取用户信息
   getUserByOpenid(openid) {
-    return User.findOne({ openid }, { openid: 0 }).exec()
+    return User.findOne({ openid }, { openid: 0, _id: 0 }).exec()
   },
 
   // id 获取用户信息
-  getUserById(openid) {
-    return User.findOne({ _id: ObjectId(postId) }).exec()
+  getUserById(userid) {
+    return User.findOne({ userid }, { openid: 0, _id: 0 }).exec()
   },
+
   // 获取在线用户
   getOnline() {
     let start = Date.now() - 60000 * 3000 // 30分钟内活跃

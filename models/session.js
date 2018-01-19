@@ -4,7 +4,6 @@ module.exports = {
   set(session) {
     return Session.create(session).exec()
   },
-
   // 获取 Session
   get(key) {
     return Session.findOne({ key })

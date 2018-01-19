@@ -3,27 +3,29 @@ const router = express.Router()
 const PositionModel = require('../models/position')
 const UserModel = require('../models/users')
 const checkLogin = require('../middlewares/check').checkLogin
+const { to } = require('../lib/util')
 
 // 提交用户坐标
-router.post('/update', checkLogin, (req, res, next) => {
-  let { coordinates, openid } = req.fields
-  let post = {
-    coordinates,
-    openid
+router.post('/update', checkLogin, async (req, res, next) => {
+  try {
+    let err, data
+    let { coordinates, userid } = req.fields
+    if (!coordinates || coordinates.length !== 2) throw new Error('位置不正确')
+
+    let pos = {
+      coordinates,
+      userid
+    }
+    // 插入轨迹
+    ;[err] = await to(PositionModel.create(pos))
+    if (err) throw new Error(err)
+    ;[err, data] = await to(UserModel.getOnline())
+    if (err) throw new Error(err)
+
+    return res.retData(data)
+  } catch (e) {
+    return res.retErr(e.message)
   }
-  // 插入轨迹
-  PositionModel.create(post)
-    .then(result => {
-      // 更新用户位置
-      UserModel.updataUserPos(post)
-      // 获取其他在线用户位置
-      UserModel.getOnline()
-        .then(result => {
-          res.retData(result)
-        })
-        .catch(next)
-    })
-    .catch(next)
 })
 
 module.exports = router

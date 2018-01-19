@@ -8,10 +8,8 @@ const UserModel = require('../models/users')
 const PostModel = require('../models/posts')
 const SessionModel = require('../models/session')
 
-const crypto = require('crypto')
 const request = require('request')
-const md5 = crypto.createHash('md5')
-const { to, createSession } = require('../lib/util')
+const { to, createSession, removeProperty, md5 } = require('../lib/util')
 const appid = config.appid
 const secret = config.secret
 
@@ -53,6 +51,8 @@ const getOpenid = code => {
 router.post('/login', async (req, res, next) => {
   try {
     let err, data
+    let userid
+
     let { code } = req.fields
     if (!code) throw new Error('无Code')
     ;[err, data] = await to(getOpenid(code))
@@ -62,23 +62,26 @@ router.post('/login', async (req, res, next) => {
     let { openid } = data
     ;[err, data] = await to(UserModel.getUserByOpenid(openid))
     if (err) throw new Error(err)
-
     let user = data
+
     // 已注册
     if (data) {
+      userid = data.userid
       ;[err] = await to(UserModel.loginByOpenid(openid))
       if (err) throw new Error(err)
     } else {
+      // 读取传过来的用户资料
       user = req.fields
-      let {avatarUrl} = user
-
       // 保存用户头像
+      let { avatarUrl } = user
       ;[err] = await to(saveAvatar(avatarUrl))
       if (err) throw new Error(err)
 
       // 创建新用户
       delete user.code
+      userid = md5(openid)
       user.openid = openid
+      user.userid = userid
       ;[err] = await to(UserModel.create(user))
       if (err) throw new Error(err)
     }
@@ -86,7 +89,7 @@ router.post('/login', async (req, res, next) => {
     // 生成 session_key
     let key = createSession()
     let session = {
-      openid,
+      userid,
       key
     }
     ;[err] = await to(SessionModel.set(session))
@@ -94,28 +97,52 @@ router.post('/login', async (req, res, next) => {
 
     user.session_key = key
     return res.retData(user)
-
   } catch (e) {
-    res.retErr(e.message)
+    return res.retErr(e.message)
   }
 })
 
 // 获取自己的文章
 router.get('/posts', checkLogin, async (req, res, next) => {
-  let { openid } = req.fields
-  let posts = await PostModel.getPostByOpenid(openid)
-  res.retData(posts)
+  try {
+    let { userid } = req.fields
+    let [err, posts] = await to(PostModel.getPostByUserid(userid))
+    if (err) throw new Error(err)
+    return res.retData(posts)
+  } catch (e) {
+    return res.retErr(e.message)
+  }
 })
 
-// 获取自己的资料
+// GET 获取自己的资料
 router.get('/info', checkLogin, async (req, res, next) => {
-  let { openid } = req.fields
-  let posts = await UserModel.getUserByOpenid(openid)
-  res.retData(posts)
+  let arr, data
+  let { userid } = req.fields
+  ;[err, data] = await to(UserModel.getUserById(userid))
+  if (err) throw new Error(err)
+  return res.retData(data)
 })
 
-// 修改自己的资料
-router.post('/info', checkLogin, async (req, res, next) => {
+// GET 获取别人的资料
+router.get('/search', checkLogin, async (req, res, next) => {
+  try {
+    let arr, data
+    const { id } = req.query
+    if (!id) throw new Error('缺少查询条件')
+    ;[err, data] = await to(UserModel.getUserById(id))
+
+    if (err) throw new Error(err)
+    if (!data) throw new Error('没有此用户')
+
+    return res.retData(data)
+  } catch (e) {
+    return res.retErr(e.message)
+  }
+})
+
+// PUT 修改自己的资料
+router.put('/info', checkLogin, async (req, res, next) => {
+  let err
   let {
     nickName,
     province,
@@ -123,17 +150,27 @@ router.post('/info', checkLogin, async (req, res, next) => {
     gender,
     city,
     avatarUrl,
+    showPos,
+    seasonCard,
     openid
   } = req.fields
-  let posts = await UserModel.updateByOpenid(openid, {
+
+  let user = {
     nickName,
     province,
     country,
     gender,
     city,
-    avatarUrl
-  })
-  res.retData('修改成功')
+    avatarUrl,
+    showPos,
+    seasonCard
+  }
+
+  removeProperty(user)
+  ;[err, data] = await to(UserModel.updateByOpenid(openid, user))
+  if (err) throw new Error(err)
+
+  return res.retData('修改成功')
 })
 
 module.exports = router

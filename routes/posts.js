@@ -7,82 +7,122 @@ const checkLogin = require('../middlewares/check').checkLogin
 const PostModel = require('../models/posts')
 const UserModel = require('../models/users')
 const fs = require('fs')
+const { to, createSession, removeProperty } = require('../lib/util')
 
 // 获取列表
 router.get('/', async (req, res, next) => {
-  let { limit = 10, page = 0, type = '' } = req.query
-  let data = await PostModel.getPosts(limit, page, type)
-  for (let item of data) {
-    delete item.openid
-  }
-  res.retData(data)
-})
-
-// POST 发表一篇文章
-router.post('/', checkLogin, async (req, res, next) => {
-  let {
-    content,
-    images = [],
-    task = {},
-    eit = '',
-    type = 'travel',
-    coordinates = [],
-    posName = '',
-    openid
-  } = req.fields
-
-  // 校验参数
   try {
-    if (!content && images.length === 0) {
-      throw new Error('你的想法呢？')
+    let { limit = 10, page = 0, find } = req.query
+    let err, data
+
+    limit = parseInt(limit)
+    page = parseInt(page)
+
+    if (isNaN(limit) || isNaN(page)) {
+      throw new Error('分页参数不正确')
     }
-    if (!openid) {
-      throw new Error('无openid')
+
+    // 带有查询条件
+    if (find) {
+      try {
+        find = JSON.parse(find)
+        let { type, userid, eit } = find
+        if (type || userid || eit) {
+          find = {
+            type,
+            userid,
+            eit
+          }
+        }
+        removeProperty(find)
+      } catch (e) {
+        res.retErr('搜索格式错误')
+        return
+      }
+    } else {
+      find = {}
     }
+    console.log(find)
+
+    ;[err, data] = await to(PostModel.getPosts(limit, page, find))
+    if (err) throw new Error(err)
+
+    for (let item of data) {
+      delete item.openid
+    }
+    res.retData(data)
   } catch (e) {
     res.retErr(e.message)
     return
   }
+})
 
-  // 获取用户资料
-  let userinfo = await UserModel.getUserByOpenid(openid)
-  let { nickName, avatarFile, city, gender, country } = userinfo
+// POST 发表一篇文章
+router.post('/', checkLogin, async (req, res, next) => {
+  try {
+    let err, data
+    let {
+      content,
+      images,
+      task,
+      eit,
+      type = 'say',
+      coordinates,
+      posName,
+      userid
+    } = req.fields
 
-  // // 获取用户发帖
-  let uPost = await PostModel.getPostByOpenid(openid)
-  if (uPost.length > 0) {
-    let { createTime } = uPost[0]
-    // 防灌水
-    let diff = Date.now() - createTime
-    if (diff <= 10000) {
-      res.retErr('歇一歇哦，发帖过快~')
-      return
+    if (!content && images.length === 0) {
+      throw new Error('你的想法呢？')
     }
-  }
 
-  let post = {
-    type,
-    content,
-    images,
-    task,
-    eit,
-    coordinates,
-    posName,
-    pv: 0,
-    nickName,
-    avatarFile,
-    city,
-    gender,
-    country,
-    openid,
-    createTime: Date.now()
-  }
+    ;[err, data] = await to(UserModel.getUserById(userid))
+    if (err) throw new Error(err)
+    if (!data) throw new Error('没有此用户')
 
-  PostModel.create(post)
-    .then(result => {
-      res.retData('发布成功！')
-    })
-    .catch(next)
+    let user = data
+    let { nickName, avatarFile, city, gender, country, postAt } = user
+
+    let diff = Date.now() - postAt
+    if (diff <= 10000) {
+      return res.retErr('歇一歇哦，发帖过快~')
+    }
+
+    let post = {
+      userid,
+      nickName,
+      avatarFile,
+      city,
+      gender,
+      country,
+      type,
+      content,
+      images,
+      task,
+      eit,
+      coordinates,
+      posName,
+      pv: 0,
+      zan: 0,
+      createTime: Date.now()
+    }
+    removeProperty(post)
+    // 创建文章
+    ;[err] = await to(PostModel.create(post))
+    if (err) throw new Error(err)
+
+    // 更新用户资料
+    user = {
+      postAt: Date.now()
+    }
+    ;[err] = await to(UserModel.updateByid(userid, user))
+    if (err) throw new Error(err)
+
+    return res.retData('发布成功！')
+  } catch (e) {
+    res.retErr(e.message)
+    return
+  }
 })
 
 // GET 获取文章详情
@@ -174,7 +214,5 @@ router.delete('/:postId', checkLogin, (req, res, next) => {
 // router.post('/upload', (req, res, next) => {
 //   res.retData(req.files.file.path.split(path.sep).pop())
 // })
-
-
 
 module.exports = router
