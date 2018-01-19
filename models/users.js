@@ -1,11 +1,16 @@
 const User = require('../lib/mongo').User
-ObjectId = require('mongodb').ObjectID
+
 module.exports = {
   // 创建新用户
   create(user) {
     user.loginAt = Date.now()
     user.createAt = Date.now()
     return User.create(user).exec()
+  },
+
+  // 增加个人主页浏览量
+  incVist(userid) {
+    return User.update({ userid }, { $inc: { vist: 1 } }).exec()
   },
 
   // Openid 更新用户信息

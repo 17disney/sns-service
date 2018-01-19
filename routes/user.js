@@ -5,8 +5,8 @@ const router = express.Router()
 const https = require('https')
 const checkLogin = require('../middlewares/check').checkLogin
 const UserModel = require('../models/users')
-const PostModel = require('../models/posts')
 const SessionModel = require('../models/session')
+const DynamModel = require('../models/dynam')
 
 const request = require('request')
 const { to, createSession, removeProperty, md5 } = require('../lib/util')
@@ -102,31 +102,24 @@ router.post('/login', async (req, res, next) => {
   }
 })
 
-// 获取自己的文章
-router.get('/posts', checkLogin, async (req, res, next) => {
-  try {
-    let { userid } = req.fields
-    let [err, posts] = await to(PostModel.getPostByUserid(userid))
-    if (err) throw new Error(err)
-    return res.retData(posts)
-  } catch (e) {
-    return res.retErr(e.message)
-  }
-})
-
 // GET 获取自己的资料
 router.get('/info', checkLogin, async (req, res, next) => {
   let arr, data
   let { userid } = req.fields
   ;[err, data] = await to(UserModel.getUserById(userid))
   if (err) throw new Error(err)
+
+  let vistList = await DynamModel.loadVist(userid)
+  data.vistList = vistList
+
   return res.retData(data)
 })
 
-// GET 获取别人的资料
-router.get('/search', checkLogin, async (req, res, next) => {
+// GET 访问别人的资料
+router.get('/vist', checkLogin, async (req, res, next) => {
   try {
     let arr, data
+    let { userid } = req.fields
     const { id } = req.query
     if (!id) throw new Error('缺少查询条件')
     ;[err, data] = await to(UserModel.getUserById(id))
@@ -134,6 +127,16 @@ router.get('/search', checkLogin, async (req, res, next) => {
     if (err) throw new Error(err)
     if (!data) throw new Error('没有此用户')
 
+    // 判断是否访问自己
+    if (userid !== id) {
+      let myInfo = await UserModel.getUserById(userid)
+      await UserModel.incVist(id)
+      await DynamModel.reVist(myInfo, id)
+      await DynamModel.vist(myInfo, id)
+    }
+
+    let vistList = await DynamModel.loadVist(id)
+    data.vistList = vistList
     return res.retData(data)
   } catch (e) {
     return res.retErr(e.message)

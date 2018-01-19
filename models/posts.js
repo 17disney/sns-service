@@ -1,8 +1,4 @@
-const marked = require('marked')
 const Post = require('../lib/mongo').Post
-const User = require('../lib/mongo').User
-const UserModel = require('./users')
-
 ObjectId = require('mongodb').ObjectID
 
 module.exports = {

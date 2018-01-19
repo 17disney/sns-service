@@ -43,7 +43,6 @@ router.get('/', async (req, res, next) => {
       find = {}
     }
     console.log(find)
-
     ;[err, data] = await to(PostModel.getPosts(limit, page, find))
     if (err) throw new Error(err)
 
@@ -120,8 +119,19 @@ router.post('/', checkLogin, async (req, res, next) => {
 
     return res.retData('发布成功！')
   } catch (e) {
-    res.retErr(e.message)
-    return
+    return res.retErr(e.message)
+  }
+})
+
+// 文章点赞
+router.post('/zan', async (req, res, next) => {
+  try {
+    const { postId, zan = true, userid } = req.fields
+    let err, data
+
+    PostModel.incZan(postId)
+  } catch (e) {
+    return res.retErr(e.message)
   }
 })
 
