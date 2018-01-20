@@ -4,6 +4,7 @@ module.exports = app => {
   app.use('/user', require('./user'))
   app.use('/comments', require('./comments'))
   app.use('/position', require('./position'))
+  app.use('/dynams', require('./dynams'))
 
   // 404 page
   app.use((req, res, err) => {

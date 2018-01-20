@@ -8,7 +8,7 @@ module.exports = {
    type: 对象类型
    op: 操作类型
   */
-  vist(user, vistid, type, op, targid) {
+  create(user, vistid, type, op, targid) {
     let { userid, nickName, avatarFile } = user
     let data = {
       type,
@@ -27,7 +27,7 @@ module.exports = {
   },
 
   // 删除重复
-  reVist(user, vistid, type, op, targid) {
+  reDynam(user, vistid, type, op, targid) {
     let { userid } = user
     let find = {
       type,
@@ -37,7 +37,7 @@ module.exports = {
       targid,
       display: true
     }
-    // 删除当天重复访问
+    // 如是浏览仅 删除当天重复访问
     if (op === 'pv') {
       find.date = date
     }
@@ -67,12 +67,11 @@ module.exports = {
     return Dynam.findOne(find).exec()
   },
 
-  // 获取访问人数
-  loadVist(vistid, type, op, targid) {
+  // 根据对象获取访问人数
+  getDynamsByTargid(targid, type, op) {
     let find = {
       type,
       op,
-      vistid,
       targid,
       display: true
     }
@@ -90,8 +89,24 @@ module.exports = {
       .exec()
   },
 
-  // 本人查看动态
-  userRead(vistid) {
+  // 用户查看动态
+  getDynamsByUserid(vistid) {
+    let $set = {
+      notice: false
+    }
+    return Dynam.find({ vistid }, { $set }).exec()
+  },
+
+  // 用户已读动态
+  readDynamsByUserid(vistid) {
+    let $set = {
+      notice: false
+    }
+    return Dynam.update({ vistid }, { $set }).exec()
+  },
+
+  // 查看 post 下动态
+  getDynamsByUserid(vistid) {
     let $set = {
       userid,
       vistid,

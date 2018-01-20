@@ -1,4 +1,6 @@
 const SessionModel = require('../models/session')
+const UserModel = require('../models/users')
+
 const { to } = require('../lib/util')
 
 module.exports = {
@@ -16,5 +18,15 @@ module.exports = {
     let { userid } = data
     req.fields.userid = data.userid
     next()
+  },
+  async getUserinfo(req, res, next) {
+    let { userid } = req.fields
+    ;[err, data] = await to(UserModel.getUserById(userid))
+    if (err) throw new Error(err)
+    if (!data) throw new Error('没有此用户')
+
+    req.userinfo = data
+    next()
   }
+
 }
