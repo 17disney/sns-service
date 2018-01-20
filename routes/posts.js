@@ -23,7 +23,6 @@ router.get('/', async (req, res, next) => {
     if (isNaN(limit) || isNaN(page)) {
       throw new Error('分页参数不正确')
     }
-
     // 带有查询条件
     if (find) {
       try {
@@ -203,28 +202,23 @@ router.put('/:postId', checkLogin, (req, res, next) => {
 })
 
 // DELETE 删除文章
-router.delete('/:postId', checkLogin, (req, res, next) => {
-  const { openid } = req.fields
-  const postId = req.params.postId
+router.delete('/', checkLogin, async (req, res, next) => {
+  try {
+    let err, data
+    const { userid } = req.fields
+    const id = req.fields.id
+    ;[err, data] = await to(PostModel.getPostById(id))
+    if (err) return res.retErr(err)
+    if (!data) res.retErr('文章不存在')
 
-  PostModel.getRawPostById(postId).then(post => {
-    if (!post) {
-      return res.retErr('文章不存在')
+    if (userid !== data.userid) {
+      return res.retErr('没有权限')
     }
-    if (post.openid !== openid) {
-      return res.retErr('你只能删除自己的文章')
-    }
-    PostModel.delPostById(postId)
-      .then(() => {
-        return res.retData('success', '删除成功')
-      })
-      .catch(next)
-  })
+    await PostModel.delPostById(id)
+    return res.retErr('删除成功')
+  } catch (e) {
+    return res.retErr(e.message)
+  }
 })
-
-// 上传图片
-// router.post('/upload', (req, res, next) => {
-//   res.retData(req.files.file.path.split(path.sep).pop())
-// })
 
 module.exports = router

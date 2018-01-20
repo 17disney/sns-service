@@ -59,4 +59,47 @@ router.post('/', checkLogin, getUserinfo, async (req, res, next) => {
   }
 })
 
+// 查找留言
+router.get('/', async (req, res, next) => {
+  try {
+    let err, data
+    let { limit = 20, page = 0, targid } = req.query
+    if (!targid) throw new Error('无目标id')
+
+    limit = parseInt(limit)
+    page = parseInt(page)
+
+    if (isNaN(limit) || isNaN(page)) {
+      throw new Error('分页参数不正确')
+    }
+
+    ;[err, data] = await to(CommentModel.getComments(limit, page, targid))
+    if (err) throw new Error(err)
+
+    return res.retData(data)
+  } catch (e) {
+    return res.retErr(e.message)
+  }
+})
+
+// DELETE 删除评论
+router.delete('/', checkLogin, async (req, res, next) => {
+  try {
+    let err, data
+    const { userid } = req.fields
+    const id = req.fields.id
+    ;[err, data] = await to(CommentModel.getCommentById(id))
+    if (err) return res.retErr(err)
+    if (!data) res.retErr('评论不存在')
+
+    if (userid !== data.userid) {
+      return res.retErr('没有权限')
+    }
+    await CommentModel.delCommentById(id)
+    return res.retErr('删除成功')
+  } catch (e) {
+    return res.retErr(e.message)
+  }
+})
+
 module.exports = router

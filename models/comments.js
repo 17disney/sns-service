@@ -8,15 +8,22 @@ module.exports = {
     return Comment.create(data).exec()
   },
 
+  // ID 获取留言
+  getCommentById(id) {
+    return Comment.findOne({ _id: ObjectId(id) }).exec()
+  },
+
+  // ID 删除留言
   delCommentById(id) {
     return Comment.remove({ _id: ObjectId(id) }).exec()
   },
 
-  // 获取对象下的所有留言
-  getComments(targid) {
-    return Comment.find({ targid })
-      // .populate({ path: 'author', model: 'User' })
-      .sort({ _id: 1 })
+  // 获取留言
+  getComments(limit, page, targid) {
+    return Comment.find({ targid }, { targid: 0, type: 0 })
+      .skip(page * limit)
+      .limit(limit)
+      .sort({ _id: -1 })
       .addCreatedAt()
       .exec()
   }
