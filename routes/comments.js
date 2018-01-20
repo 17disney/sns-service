@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const checkLogin = require('../middlewares/check').checkLogin
+const { checkLogin, getUserinfo } = require('../middlewares/check')
 const CommentModel = require('../models/comments')
 const PostModel = require('../models/posts')
 const UserModel = require('../models/users')
@@ -9,14 +9,17 @@ const UserModel = require('../models/users')
 const { to, removeProperty } = require('../lib/util')
 
 // POST /comments 创建一条留言
-router.post('/', checkLogin, async (req, res, next) => {
+router.post('/', checkLogin, getUserinfo, async (req, res, next) => {
   try {
     let err, data
     const { content, userid, targid, type = 'post' } = req.fields
+    const { nickName, avatarFile, postAt } = req.userinfo
     let vistid
 
-    if (!content) throw new Error('无内容')
-    if (!targid) throw new Error('无对象')
+    let diff = Date.now() - postAt
+    if (diff <= 10000) {
+      throw new Error('歇一歇哦，发帖过快~')
+    }
 
     if (type === 'post') {
       ;[err, data] = await to(PostModel.getPostById(targid))
@@ -36,11 +39,19 @@ router.post('/', checkLogin, async (req, res, next) => {
       vistid,
       targid,
       type,
-      content
+      content,
+      nickName,
+      avatarFile
     }
     removeProperty(comment)
     ;[err, data] = await to(CommentModel.create(comment))
     if (err) throw new Error(err)
+
+    // 更新用户发帖时间
+    user = {
+      postAt: Date.now()
+    }
+    await UserModel.updateByid(userid, user)
 
     return res.retData('发表成功')
   } catch (e) {

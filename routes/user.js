@@ -3,7 +3,7 @@ const fs = require('fs')
 const express = require('express')
 const router = express.Router()
 const https = require('https')
-const checkLogin = require('../middlewares/check').checkLogin
+const { checkLogin, getUserinfo } = require('../middlewares/check')
 const UserModel = require('../models/users')
 const SessionModel = require('../models/session')
 const DynamModel = require('../models/dynams')
@@ -105,14 +105,13 @@ router.post('/login', async (req, res, next) => {
 })
 
 // GET 获取自己的资料
-router.get('/info', checkLogin, async (req, res, next) => {
+router.get('/info', checkLogin, getUserinfo, async (req, res, next) => {
   let arr, data
   let { userid } = req.fields
-  ;[err, data] = await to(UserModel.getUserById(userid))
-  if (err) throw new Error(err)
+  data = req.userinfo
 
-  let vistList = await DynamModel.loadVist(userid, 'vist', 'pv')
-  let likeList = await DynamModel.loadVist(userid, 'vist', 'like')
+  let vistList = await DynamModel.getDynamsByTargid(userid, 'user', 'pv')
+  let likeList = await DynamModel.getDynamsByTargid(userid, 'user', 'like')
   data.vistList = vistList
   data.likeList = likeList
 
@@ -135,55 +134,15 @@ router.get('/vist', checkLogin, async (req, res, next) => {
     if (userid !== id) {
       let user = await UserModel.getUserById(userid)
       await UserModel.incPv(id)
-      await DynamModel.reVist(user, id, 'vist', 'pv')
-      await DynamModel.vist(user, id, 'vist', 'pv')
+      await DynamModel.reDynam(user, id, 'user', 'pv')
+      await DynamModel.create(user, id, 'user', 'pv', id)
     }
 
-    let vistList = await DynamModel.loadVist(id, 'vist', 'pv')
-    let likeList = await DynamModel.loadVist(id, 'vist', 'like')
+    let vistList = await DynamModel.getDynamsByTargid(id, 'user', 'pv')
+    let likeList = await DynamModel.getDynamsByTargid(id, 'user', 'like')
     data.vistList = vistList
     data.likeList = likeList
     return res.retData(data)
-  } catch (e) {
-    return res.retErr(e.message)
-  }
-})
-
-// POST 点赞
-router.post('/like', checkLogin, async (req, res, next) => {
-  try {
-    let err, data
-    const { userid, id: vistid } = req.fields
-    let { op } = req.fields
-    op = !!op
-
-    if (!vistid) {
-      throw new Error('没有指定用户')
-    }
-
-    if (userid === vistid) {
-      throw new Error('不能给自己点赞')
-    }
-
-    ;[err, data] = await to(UserModel.getUserById(userid))
-    if (err) throw new Error(err)
-    const user = data
-
-    // 检查知否已点赞
-    ;[err, data] = await to(DynamModel.checkLike(userid, vistid, 'vist'))
-    if (err) throw new Error(err)
-    if (data && op) throw new Error('已点过赞')
-    if (!data && !op) throw new Error('取消点赞成功')
-
-    if (op) {
-      await DynamModel.vist(user, vistid, 'vist', 'like')
-      await UserModel.incLike(vistid, 1)
-      return res.retData('点赞成功')
-    } else {
-      await DynamModel.reVist(user, vistid, 'vist', 'like')
-      await UserModel.incLike(vistid, -1)
-      return res.retData('取消点赞成功')
-    }
   } catch (e) {
     return res.retErr(e.message)
   }

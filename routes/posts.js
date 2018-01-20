@@ -3,7 +3,7 @@ const moment = require('moment')
 const router = express.Router()
 const path = require('path')
 
-const checkLogin = require('../middlewares/check').checkLogin
+const { checkLogin, getUserinfo } = require('../middlewares/check')
 const PostModel = require('../models/posts')
 const UserModel = require('../models/users')
 const DynamModel = require('../models/dynams')
@@ -110,25 +110,13 @@ router.post('/', checkLogin, async (req, res, next) => {
     ;[err] = await to(PostModel.create(post))
     if (err) throw new Error(err)
 
-    // 更新用户资料
+    // 更新用户发帖时间
     user = {
       postAt: Date.now()
     }
-    ;[err] = await to(UserModel.updateByid(userid, user))
-    if (err) throw new Error(err)
+    await UserModel.updateByid(userid, user)
 
     return res.retData('发布成功！')
-  } catch (e) {
-    return res.retErr(e.message)
-  }
-})
-
-// 文章点赞
-router.post('/like', async (req, res, next) => {
-  try {
-    const { userid, postid, op = true } = req.fields
-    let err, data
-    if (!postid) throw new Error('没有文章id')
   } catch (e) {
     return res.retErr(e.message)
   }
@@ -152,12 +140,14 @@ router.get('/:postid', checkLogin, async (req, res, next) => {
     if (userid !== vistid) {
       let user = await UserModel.getUserById(userid)
       await PostModel.incPv(postid)
-      await DynamModel.reVist(user, vistid, 'post', 'pv')
-      await DynamModel.vist(user, vistid, 'post', 'pv', postid)
+      await DynamModel.reDynam(user, vistid, 'post', 'pv')
+      await DynamModel.create(user, vistid, 'post', 'pv', postid)
     }
 
-    let pvList = await DynamModel.loadVist(vistid, 'post', 'pv', postid)
+    let pvList = await DynamModel.getDynamsByTargid(postid, 'post', 'pv')
+    let likeList = await DynamModel.getDynamsByTargid(postid, 'post', 'like')
     data.pvList = pvList
+    data.likeList = likeList
 
     delete data.openid
     return res.retData(data)
