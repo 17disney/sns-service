@@ -152,6 +152,7 @@ router.get('/vist', checkLogin, async (req, res, next) => {
 router.put('/info', checkLogin, async (req, res, next) => {
   let err
   let {
+    userid,
     nickName,
     province,
     country,
@@ -160,7 +161,9 @@ router.put('/info', checkLogin, async (req, res, next) => {
     avatarUrl,
     showPos,
     seasonCard,
-    openid
+    sharePosition,
+    sharePosLand,
+    sharePosKnow
   } = req.fields
 
   let user = {
@@ -171,11 +174,14 @@ router.put('/info', checkLogin, async (req, res, next) => {
     city,
     avatarUrl,
     showPos,
-    seasonCard
+    seasonCard,
+    sharePosition,
+    sharePosLand,
+    sharePosKnow
   }
 
   removeProperty(user)
-  ;[err, data] = await to(UserModel.updateByOpenid(openid, user))
+  ;[err, data] = await to(UserModel.updateById(userid, user))
   if (err) throw new Error(err)
 
   return res.retData('修改成功')

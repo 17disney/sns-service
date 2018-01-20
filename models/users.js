@@ -3,10 +3,12 @@ const User = require('../lib/mongo').User
 module.exports = {
   // 创建新用户
   create(user) {
-    user.loginAt = Date.now()
     user.createAt = Date.now()
     user.pv = 0
     user.like = 0
+    user.sharePosition = true // 是否共享位置
+    user.sharePosLand = true // 仅在乐园时共享
+    user.sharePosKnow = false // 是否已知晓位置共享
     return User.create(user).exec()
   },
 
