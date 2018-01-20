@@ -23,27 +23,7 @@ router.get('/', async (req, res, next) => {
     if (isNaN(limit) || isNaN(page)) {
       throw new Error('分页参数不正确')
     }
-    // 带有查询条件
-    if (find) {
-      try {
-        find = JSON.parse(find)
-        let { type, userid, eit } = find
-        if (type || userid || eit) {
-          find = {
-            type,
-            userid,
-            eit
-          }
-        }
-        removeProperty(find)
-      } catch (e) {
-        res.retErr('搜索格式错误')
-        return
-      }
-    } else {
-      find = {}
-    }
-    console.log(find)
+
     ;[err, data] = await to(PostModel.getPosts(limit, page, find))
     if (err) throw new Error(err)
 

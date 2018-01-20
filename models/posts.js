@@ -1,6 +1,6 @@
 const Post = require('../lib/mongo').Post
 ObjectId = require('mongodb').ObjectID
-
+const { removeProperty } = require('../lib/util')
 module.exports = {
   // 创建一篇文章
   create(post) {
@@ -25,7 +25,27 @@ module.exports = {
 
   // 获取文章列表
   getPosts(limit, page, find) {
-    return Post.find(find, { openid: 0 })
+    if (find) {
+      try {
+        find = JSON.parse(find)
+      } catch (e) {
+        res.retErr('搜索格式错误')
+      }
+      let { type, userid, eit } = find
+
+      find = {
+        type,
+        userid
+      }
+      if (eit) {
+        find.eit = { $in: eit }
+      }
+      removeProperty(find)
+    } else {
+      find = {}
+    }
+
+    return Post.find(find)
       .skip(page * limit)
       .limit(limit)
       .sort({ _id: -1 })
