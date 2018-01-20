@@ -28,4 +28,10 @@ router.post('/update', checkLogin, async (req, res, next) => {
   }
 })
 
+// 获取在线用户
+router.get('/online', async (req, res, next) => {
+  let data = await UserModel.getOnline()
+  res.retData(data)
+})
+
 module.exports = router

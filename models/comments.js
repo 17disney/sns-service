@@ -26,5 +26,14 @@ module.exports = {
       .sort({ _id: -1 })
       .addCreatedAt()
       .exec()
+  },
+
+  // 留言已读
+  clearCommentsByUserid(vistid) {
+    let $set = {
+      notice: false
+    }
+    return Comment.update({ vistid }, { $set }, { multi: true }).exec()
   }
+
 }

@@ -9,6 +9,7 @@ module.exports = {
     user.sharePosition = true // 是否共享位置
     user.sharePosLand = true // 仅在乐园时共享
     user.sharePosKnow = false // 是否已知晓位置共享
+    user.shareWechat = false //是否分享微信号
     return User.create(user).exec()
   },
 

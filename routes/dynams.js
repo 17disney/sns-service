@@ -62,4 +62,30 @@ router.post('/like', checkLogin, getUserinfo, async (req, res, next) => {
   }
 })
 
+// 获取所有动态
+router.get('/', checkLogin, async (req, res, next) => {
+  try {
+    let err, data
+    const { userid } = req.fields
+    let { notice } = req.query
+    ;[err, data] = await to(DynamModel.getDynamsByUserid(userid, notice))
+    if (err) throw new Error(err)
+    return res.retData(data)
+  } catch (e) {
+    return res.retErr(e.message)
+  }
+})
+
+// 所有动态已读
+router.put('/clear', checkLogin, async (req, res, next) => {
+  try {
+    const { userid } = req.fields
+    await DynamModel.clearDynamsByUserid(userid)
+
+    return res.retData('ok')
+  } catch (e) {
+    return res.retErr(e.message)
+  }
+})
+
 module.exports = router

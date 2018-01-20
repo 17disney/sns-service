@@ -89,29 +89,23 @@ module.exports = {
       .exec()
   },
 
-  // 用户查看动态
-  getDynamsByUserid(vistid) {
+  // 动态已读
+  clearDynamsByUserid(vistid) {
     let $set = {
       notice: false
     }
-    return Dynam.find({ vistid }, { $set }).exec()
+    return Dynam.update({ vistid }, { $set }, { multi: true }).exec()
   },
 
-  // 用户已读动态
-  readDynamsByUserid(vistid) {
-    let $set = {
-      notice: false
+  // 查看自己的动态
+  getDynamsByUserid(vistid, notice) {
+    let find = {
+      vistid
     }
-    return Dynam.update({ vistid }, { $set }).exec()
-  },
-
-  // 查看 post 下动态
-  getDynamsByUserid(vistid) {
-    let $set = {
-      userid,
-      vistid,
-      notice: false
+    // 查找已读
+    if (notice) {
+      find.notice = true
     }
-    return Dynam.update({ vistid }, { $set }).exec()
+    return Dynam.find(find).exec()
   }
 }

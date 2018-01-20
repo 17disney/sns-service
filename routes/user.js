@@ -163,7 +163,9 @@ router.put('/info', checkLogin, async (req, res, next) => {
     seasonCard,
     sharePosition,
     sharePosLand,
-    sharePosKnow
+    sharePosKnow,
+    shareWechat,
+    wechat
   } = req.fields
 
   let user = {
@@ -177,7 +179,9 @@ router.put('/info', checkLogin, async (req, res, next) => {
     seasonCard,
     sharePosition,
     sharePosLand,
-    sharePosKnow
+    sharePosKnow,
+    shareWechat,
+    wechat
   }
 
   removeProperty(user)

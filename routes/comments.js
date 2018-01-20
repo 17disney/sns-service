@@ -72,11 +72,22 @@ router.get('/', async (req, res, next) => {
     if (isNaN(limit) || isNaN(page)) {
       throw new Error('分页参数不正确')
     }
-
     ;[err, data] = await to(CommentModel.getComments(limit, page, targid))
     if (err) throw new Error(err)
 
     return res.retData(data)
+  } catch (e) {
+    return res.retErr(e.message)
+  }
+})
+
+// 以读所有留言
+router.put('/clear', checkLogin, async (req, res, next) => {
+  try {
+    const { userid } = req.fields
+    await CommentModel.clearCommentsByUserid(userid)
+
+    return res.retData('ok')
   } catch (e) {
     return res.retErr(e.message)
   }
