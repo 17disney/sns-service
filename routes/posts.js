@@ -6,7 +6,7 @@ const path = require('path')
 const checkLogin = require('../middlewares/check').checkLogin
 const PostModel = require('../models/posts')
 const UserModel = require('../models/users')
-const DynamModel = require('../models/dynam')
+const DynamModel = require('../models/dynams')
 
 const fs = require('fs')
 const { to, createSession, removeProperty } = require('../lib/util')
@@ -189,7 +189,7 @@ router.put('/:postId', checkLogin, (req, res, next) => {
     return
   }
 
-  PostModel.getRawPostById(postId).then(post => {
+  PostModel.getPostById(postId).then(post => {
     if (!post) {
       return res.retErr('文章不存在')
     }

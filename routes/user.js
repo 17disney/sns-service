@@ -6,7 +6,7 @@ const https = require('https')
 const checkLogin = require('../middlewares/check').checkLogin
 const UserModel = require('../models/users')
 const SessionModel = require('../models/session')
-const DynamModel = require('../models/dynam')
+const DynamModel = require('../models/dynams')
 
 const request = require('request')
 const { to, createSession, removeProperty, md5 } = require('../lib/util')
