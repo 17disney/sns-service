@@ -189,13 +189,13 @@ router.delete('/', checkLogin, async (req, res, next) => {
     const id = req.fields.id
     ;[err, data] = await to(PostModel.getPostById(id))
     if (err) return res.retErr(err)
-    if (!data) res.retErr('文章不存在')
+    if (!data) throw new Error('文章不存在')
 
     if (userid !== data.userid) {
-      return res.retErr('没有权限')
+      throw new Error('没有权限')
     }
     await PostModel.delPostById(id)
-    return res.retErr('删除成功')
+    return res.retMsg('删除成功')
   } catch (e) {
     return res.retErr(e.message)
   }

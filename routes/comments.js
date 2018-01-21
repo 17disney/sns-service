@@ -53,7 +53,7 @@ router.post('/', checkLogin, getUserinfo, async (req, res, next) => {
     }
     await UserModel.updateByid(userid, user)
 
-    return res.retData('发表成功')
+    return res.retMsg('发表成功')
   } catch (e) {
     return res.retErr(e.message)
   }
@@ -87,7 +87,7 @@ router.put('/clear', checkLogin, async (req, res, next) => {
     const { userid } = req.fields
     await CommentModel.clearCommentsByUserid(userid)
 
-    return res.retData('ok')
+    return res.retMsg('ok')
   } catch (e) {
     return res.retErr(e.message)
   }
@@ -107,7 +107,7 @@ router.delete('/', checkLogin, async (req, res, next) => {
       return res.retErr('没有权限')
     }
     await CommentModel.delCommentById(id)
-    return res.retErr('删除成功')
+    return res.retMsg('删除成功')
   } catch (e) {
     return res.retErr(e.message)
   }

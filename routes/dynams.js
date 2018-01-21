@@ -46,7 +46,7 @@ router.post('/like', checkLogin, getUserinfo, async (req, res, next) => {
       } else if (type === 'user') {
         await UserModel.incLike(vistid, 1)
       }
-      return res.retData('点赞成功')
+      return res.retMsg('点赞成功')
     } else {
       // 取消点赞
       await DynamModel.reDynam(user, vistid, type, 'like', targid)
@@ -55,7 +55,7 @@ router.post('/like', checkLogin, getUserinfo, async (req, res, next) => {
       } else if (type === 'user') {
         await UserModel.incLike(vistid, -1)
       }
-      return res.retData('取消点赞成功')
+      return res.retMsg('取消点赞成功')
     }
   } catch (e) {
     return res.retErr(e.message)
@@ -82,7 +82,7 @@ router.put('/clear', checkLogin, async (req, res, next) => {
     const { userid } = req.fields
     await DynamModel.clearDynamsByUserid(userid)
 
-    return res.retData('ok')
+    return res.retMsg('ok')
   } catch (e) {
     return res.retErr(e.message)
   }

@@ -188,7 +188,7 @@ router.put('/info', checkLogin, async (req, res, next) => {
   ;[err, data] = await to(UserModel.updateById(userid, user))
   if (err) throw new Error(err)
 
-  return res.retData('修改成功')
+  return res.retMsg('修改成功')
 })
 
 module.exports = router

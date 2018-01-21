@@ -27,8 +27,11 @@ app.use((req, res, next) => {
   res.retErr = (err, code = 400) => {
     res.json({ err, code })
   }
-  res.retData = (data, code = 200) => {
-    res.json({ data, code })
+  res.retMsg = (msg, code = 200) => {
+    res.json({ msg, code })
+  }
+  res.retData = data => {
+    res.json(data)
   }
   next()
 })
