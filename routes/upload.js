@@ -19,7 +19,7 @@ router.get('/upload_token', (req, res, next) => {
 
   let putPolicy = new qiniu.rs.PutPolicy(options)
   let uploadToken = putPolicy.uploadToken(mac)
-  return res.retData(uploadToken)
+  return res.retData({uploadToken})
 })
 
 module.exports = router
