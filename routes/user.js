@@ -88,7 +88,7 @@ router.post('/login', async (req, res, next) => {
       if (err) throw new Error(err)
     }
 
-    // 生成 session_key
+    // 生成 sessionKey
     let key = createSession()
     let session = {
       userid,
@@ -97,7 +97,7 @@ router.post('/login', async (req, res, next) => {
     ;[err] = await to(SessionModel.set(session))
     if (err) throw new Error(err)
 
-    user.session_key = key
+    user.sessionKey = key
     return res.retData(user)
   } catch (e) {
     return res.retErr(e.message)
