@@ -128,7 +128,7 @@ router.get('/:postid', checkLogin, async (req, res, next) => {
       DynamModel.checkLike(userid, vistid, 'post', postid)
     )
     if (err) throw new Error(err)
-    if (data && op) throw (like = true)
+    if (data) throw (like = true)
 
     let pvList = await DynamModel.getDynamsByTargid(postid, 'post', 'pv')
     let likeList = await DynamModel.getDynamsByTargid(postid, 'post', 'like')
