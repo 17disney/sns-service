@@ -123,10 +123,19 @@ router.get('/:postid', checkLogin, async (req, res, next) => {
       await DynamModel.create(user, vistid, 'post', 'pv', postid)
     }
 
+    let like = false
+    ;[err, data] = await to(
+      DynamModel.checkLike(userid, vistid, 'post', postid)
+    )
+    if (err) throw new Error(err)
+    if (data && op) throw (like = true)
+
     let pvList = await DynamModel.getDynamsByTargid(postid, 'post', 'pv')
     let likeList = await DynamModel.getDynamsByTargid(postid, 'post', 'like')
+
     data.pvList = pvList
     data.likeList = likeList
+    data.like = like
 
     delete data.openid
     return res.retData(data)
