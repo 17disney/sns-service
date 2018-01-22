@@ -19,7 +19,7 @@ module.exports = {
   },
 
   // 获取留言
-  getComments(limit, page, targid) {
+  getComments(targid, limit, page) {
     return Comment.find({ targid }, { targid: 0, type: 0 })
       .skip(page * limit)
       .limit(limit)

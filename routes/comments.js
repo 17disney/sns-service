@@ -72,7 +72,7 @@ router.get('/', async (req, res, next) => {
     if (isNaN(limit) || isNaN(page)) {
       throw new Error('分页参数不正确')
     }
-    ;[err, data] = await to(CommentModel.getComments(limit, page, targid))
+    ;[err, data] = await to(CommentModel.getComments(targid, limit, page))
     if (err) throw new Error(err)
 
     return res.retData(data)

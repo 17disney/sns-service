@@ -7,6 +7,7 @@ const { checkLogin, getUserinfo } = require('../middlewares/check')
 const PostModel = require('../models/posts')
 const UserModel = require('../models/users')
 const DynamModel = require('../models/dynams')
+const CommentModel = require('../models/comments')
 
 const fs = require('fs')
 const { to, createSession, removeProperty } = require('../lib/util')
@@ -133,9 +134,11 @@ router.get('/:postid', checkLogin, async (req, res, next) => {
 
     let pvList = await DynamModel.getDynamsByTargid(postid, 'post', 'pv')
     let likeList = await DynamModel.getDynamsByTargid(postid, 'post', 'like')
+    let commentList = await CommentModel.getComments(postid, 10, 0)
 
     post.pvList = pvList
     post.likeList = likeList
+    post.commentList = commentList
     post.like = like
 
     delete post.openid
