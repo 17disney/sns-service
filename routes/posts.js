@@ -113,9 +113,10 @@ router.get('/:postid', checkLogin, async (req, res, next) => {
 
     ;[err, data] = await to(PostModel.getPostById(postid))
     if (err) throw new Error(err)
+    let post = data
+    let vistid = post.userid //作者id
 
-    let vistid = data.userid
-
+    // 判断浏览者是否是作者
     if (userid !== vistid) {
       let user = await UserModel.getUserById(userid)
       await PostModel.incPv(postid)
@@ -133,12 +134,12 @@ router.get('/:postid', checkLogin, async (req, res, next) => {
     let pvList = await DynamModel.getDynamsByTargid(postid, 'post', 'pv')
     let likeList = await DynamModel.getDynamsByTargid(postid, 'post', 'like')
 
-    data.pvList = pvList
-    data.likeList = likeList
-    data.like = like
+    post.pvList = pvList
+    post.likeList = likeList
+    post.like = like
 
-    delete data.openid
-    return res.retData(data)
+    delete post.openid
+    return res.retData(post)
   } catch (e) {
     return res.retErr(e.message)
   }
