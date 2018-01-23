@@ -10,10 +10,10 @@ module.exports = {
       sessionKey = req.fields.sessionKey
     }
     if (!sessionKey) {
-      return res.retErr('未登录')
+      return res.retErr('未登录', 401)
     }
     let [err, data] = await to(SessionModel.get(sessionKey))
-    if (err || !data) return res.retErr('登录已失效')
+    if (err || !data) return res.retErr('登录已失效', 401)
     let { userid } = data
 
     // 旧版本没有生成userid，自动生成
@@ -23,7 +23,7 @@ module.exports = {
       if (err) throw new Error(err)
       let { openid } = data
       if (!openid) {
-        return res.retErr('用户id错误')
+        return res.retErr('用户id错误', 401)
       }
       userid = md5(openid)
       UserModel.updateByOpenid({ openid }, { userid })

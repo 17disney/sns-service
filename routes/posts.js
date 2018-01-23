@@ -103,11 +103,11 @@ router.post('/', checkLogin, async (req, res, next) => {
 })
 
 // GET 获取文章详情
-router.get('/:postid', checkLogin, async (req, res, next) => {
+router.get('/:postid', async (req, res, next) => {
   try {
     let err, data
     const { postid } = req.params
-    const { userid } = req.fields
+    const { userid } = req.query // 已登录状态
     if (!postid) {
       throw new Error('没有文章id')
     }
@@ -126,11 +126,14 @@ router.get('/:postid', checkLogin, async (req, res, next) => {
     }
 
     let like = false
-    ;[err, data] = await to(
-      DynamModel.checkLike(userid, vistid, 'post', postid)
-    )
-    if (err) throw new Error(err)
-    if (data) like = true
+    // 已登录则检查是否已点赞
+    if (userid) {
+      ;[err, data] = await to(
+        DynamModel.checkLike(userid, vistid, 'post', postid)
+      )
+      if (err) throw new Error(err)
+      if (data) like = true
+    }
 
     let pvList = await DynamModel.getDynamsByTargid(postid, 'post', 'pv')
     let likeList = await DynamModel.getDynamsByTargid(postid, 'post', 'like')
