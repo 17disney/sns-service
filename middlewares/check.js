@@ -14,6 +14,7 @@ module.exports = {
     }
     let [err, data] = await to(SessionModel.get(sessionKey))
     if (err || !data) return res.retErr('登录已失效')
+    let { userid } = data
 
     // 旧版本没有生成userid，自动生成
     if (!userid) {
