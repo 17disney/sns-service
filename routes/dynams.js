@@ -28,15 +28,15 @@ router.post('/like', checkLogin, getUserinfo, async (req, res, next) => {
     if (type === 'post') {
       ;[err, data] = await to(PostModel.getPostById(targid))
       if (err || !data) throw new Error('没有此文章')
-      vistid = data.userid // 获取文章作者
+      vistid = data.userid // 获取文章作者id
     }
 
     // 检查知否已点赞
     ;[err, data] = await to(DynamModel.checkLike(userid, vistid, type, targid))
-
     if (err) throw new Error(err)
+
     if (data && op) throw new Error('已点过赞')
-    if (!data && !op) throw new Error('取消点赞成功')
+    if (!data && !op) throw new Error('已取消点赞')
 
     // 点赞
     if (op) {
