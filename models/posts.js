@@ -9,6 +9,10 @@ module.exports = {
     return Post.create(post).exec()
   },
 
+  getPostsCountByUserid(userid) {
+    return Post.count({ userid }).exec()
+  },
+
   // 查找用户下的文章
   getPostByUserid(userid) {
     return Post.find({ userid })

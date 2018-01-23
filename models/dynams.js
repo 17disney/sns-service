@@ -107,5 +107,9 @@ module.exports = {
       find.notice = true
     }
     return Dynam.find(find).exec()
+  },
+
+  getDynamsCountByUserid(vistid, type, op) {
+    return Dynam.count({ vistid, type, op }).exec()
   }
 }

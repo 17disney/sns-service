@@ -7,6 +7,7 @@ const { checkLogin, getUserinfo } = require('../middlewares/check')
 const UserModel = require('../models/users')
 const SessionModel = require('../models/session')
 const DynamModel = require('../models/dynams')
+const PostModel = require('../models/posts')
 
 const request = require('request')
 const { to, createSession, removeProperty, md5 } = require('../lib/util')
@@ -140,6 +141,13 @@ router.get('/vist', checkLogin, async (req, res, next) => {
 
     let vistList = await DynamModel.getDynamsByTargid(id, 'user', 'pv')
     let likeList = await DynamModel.getDynamsByTargid(id, 'user', 'like')
+
+    let postLike = await DynamModel.getDynamsCountByUserid(id, 'post', 'like')
+    let post = await PostModel.getPostsCountByUserid(id)
+
+    data.postLike = postLike
+    data.post = post
+
     data.vistList = vistList
     data.likeList = likeList
     return res.retData(data)
