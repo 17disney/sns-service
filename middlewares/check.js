@@ -1,7 +1,7 @@
 const SessionModel = require('../models/session')
 const UserModel = require('../models/users')
 
-const { to } = require('../lib/util')
+const { to, md5 } = require('../lib/util')
 
 module.exports = {
   async checkLogin(req, res, next) {
@@ -14,7 +14,16 @@ module.exports = {
     }
     let [err, data] = await to(SessionModel.get(sessionKey))
     if (err || !data) return res.retErr('登录已失效')
-    let { userid } = data
+    let { userid, openid } = data
+
+    if (!openid) {
+      return res.retErr('用户id错误')
+    }
+    // 旧版本没有生成userid，自动生成
+    if (!userid && openid) {
+      userid = md5(openid)
+      UserModel.updateByOpenid({ openid }, { userid })
+    }
     req.fields.userid = userid
     next()
   },
@@ -27,5 +36,4 @@ module.exports = {
     req.userinfo = data
     next()
   }
-
 }

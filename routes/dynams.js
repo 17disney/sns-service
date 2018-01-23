@@ -17,7 +17,7 @@ router.post('/like', checkLogin, getUserinfo, async (req, res, next) => {
     let err, data, vistid
     const { targid, type } = req.fields
     if (!targid) throw new Error('没有指定对象id')
-    if (!type) throw new Error('没有指定对象类型')
+    if (type !== 'post' || type !== 'user') throw new Error('类型错误')
 
     const user = req.userinfo
     const { userid } = user
