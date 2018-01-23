@@ -14,16 +14,20 @@ module.exports = {
     }
     let [err, data] = await to(SessionModel.get(sessionKey))
     if (err || !data) return res.retErr('登录已失效')
-    let { userid, openid } = data
 
-    if (!openid) {
-      return res.retErr('用户id错误')
-    }
     // 旧版本没有生成userid，自动生成
-    if (!userid && openid) {
+    if (!userid) {
+      // 获取用户资料
+      ;[err, data] = await to(UserModel.getUserById(userid))
+      if (err) throw new Error(err)
+      let { openid } = data
+      if (!openid) {
+        return res.retErr('用户id错误')
+      }
       userid = md5(openid)
       UserModel.updateByOpenid({ openid }, { userid })
     }
+
     req.fields.userid = userid
     next()
   },
