@@ -42,7 +42,7 @@ router.post('/like', checkLogin, getUserinfo, async (req, res, next) => {
     if (op) {
       await DynamModel.create(user, vistid, type, 'like', targid)
       if (type === 'post') {
-        await PostModel.incLike(vistid, 1)
+        await PostModel.incLike(targid, 1)
       } else if (type === 'user') {
         await UserModel.incLike(vistid, 1)
       }
@@ -51,7 +51,7 @@ router.post('/like', checkLogin, getUserinfo, async (req, res, next) => {
       // 取消点赞
       await DynamModel.reDynam(user, vistid, type, 'like', targid)
       if (type === 'post') {
-        await PostModel.incLike(vistid, -1)
+        await PostModel.incLike(targid, -1)
       } else if (type === 'user') {
         await UserModel.incLike(vistid, -1)
       }
