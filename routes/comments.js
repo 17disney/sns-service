@@ -53,7 +53,7 @@ router.post('/', checkLogin, getUserinfo, async (req, res, next) => {
     }
     await UserModel.updateByid(userid, user)
 
-    return res.retMsg('发表成功')
+    return res.retMsg('发布成功')
   } catch (e) {
     return res.retErr(e.message)
   }

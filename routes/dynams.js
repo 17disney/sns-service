@@ -55,7 +55,7 @@ router.post('/like', checkLogin, getUserinfo, async (req, res, next) => {
       } else if (type === 'user') {
         await UserModel.incLike(vistid, -1)
       }
-      return res.retMsg('取消点赞成功')
+      return res.retMsg('已取消点赞')
     }
   } catch (e) {
     return res.retErr(e.message)

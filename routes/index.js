@@ -12,7 +12,7 @@ module.exports = app => {
   // 404 page
   app.use((req, res, err) => {
     if (!res.headersSent) {
-      res.json({ err: '404' })
+      res.retErr('404')
     }
   })
 }
