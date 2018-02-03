@@ -75,17 +75,7 @@ app.use((err, req, res, next) => {
 })
 
 // 监听端口，启动程序
-if (process.env.NODE_ENV === 'production') {
-  http.createServer(app).listen(config.port)
-} else {
-  var key = fs.readFileSync('./cert/privatekey.pem', 'utf8')
-  var cert = fs.readFileSync('./cert/certificate.crt', 'utf8')
-  var credentials = { key, cert }
-
-  var httpsServer = https.createServer(credentials, app)
-  httpsServer.listen(443)
-  console.log('443')
-}
+http.createServer(app).listen(config.port)
 
 process.on('unhandledRejection', e => {
   console.log(e.message)
