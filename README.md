@@ -49,6 +49,7 @@ docker stop disney-sns \
 && docker build -t disney-sns . \
 && docker run -d --name disney-sns \
 -e TZ='Asia/Shanghai' \
+-p 17201:17201 \
 --mount type=bind,source=/data/config/disney-sns,target=/app/config \
 disney-sns node index -f all
 ```
