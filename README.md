@@ -39,3 +39,16 @@ config = {
 
 
 
+
+### 持续集成
+
+```
+docker stop disney-sns \
+&& docker rm disney-sns \
+&& cd /data/jenkins/workspace/disney-sns \
+&& docker build -t disney-sns . \
+&& docker run -d --name disney-sns \
+-e TZ='Asia/Shanghai' \
+--mount type=bind,source=/data/config/disney-sns,target=/app/config \
+disney-sns node index -f all
+```
